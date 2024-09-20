@@ -31,3 +31,10 @@ Test Forbidden Actions:
 Try to create a pod using the Service Account (this should fail):
 
 kubectl run busybox --image=busybox --kubeconfig=kubeconfig-demo
+
+
+-----
+kubectl create secret generic demo-sa-token --from-literal=token=$(openssl rand -base64 32) -n demo
+
+kubectl patch serviceaccount demo-sa -p '{"secrets": [{"name": "demo-sa-token"}]}' -n demo
+
