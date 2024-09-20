@@ -60,3 +60,34 @@ users:
   user:
     token: eyJhbGciOiJSUzI1NiIsImtpZCI6Ijc1Y2Y5YjY3Z...  # Example token
 --------------------
+
+remaining steps:
+
+- create a eks-sa-role
+- add below annotation 
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-sa
+  namespace: demo
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/EKSServiceAccountRole
+
+
+- cm change
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::<account-id>:role/EKSServiceAccountRole
+      username: demo-sa
+      groups:
+        - system:masters
+
+kubectl get configmap aws-auth -n kube-system -o yaml
+kubectl get pods --kubeconfig=/path/to/kubeconfig-demo
