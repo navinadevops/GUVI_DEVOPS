@@ -1,0 +1,33 @@
+sample pod:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+
+Get the Service Account Token:
+
+SECRET_NAME=$(kubectl get sa demo-sa -n demo -o jsonpath="{.secrets[0].name}")
+TOKEN=$(kubectl get secret $SECRET_NAME -n demo -o jsonpath="{.data.token}" | base64 --decode)
+
+Set Up a Temporary kubeconfig:
+Create a temporary kubeconfig file named kubeconfig-demo:
+
+kubectl config set-credentials demo-sa --token=$TOKEN --kubeconfig=kubeconfig-demo
+kubectl config set-context demo --cluster=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}') --namespace=demo --user=demo-sa --kubeconfig=kubeconfig-demo
+kubectl config use-context demo --kubeconfig=kubeconfig-demo
+
+Test Pod Access:
+List pods using the Service Account:
+
+kubectl get pods --kubeconfig=kubeconfig-demo
+
+Test Forbidden Actions:
+Try to create a pod using the Service Account (this should fail):
+
+kubectl run busybox --image=busybox --kubeconfig=kubeconfig-demo
