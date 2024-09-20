@@ -37,4 +37,26 @@ kubectl run busybox --image=busybox --kubeconfig=kubeconfig-demo
 kubectl create secret generic demo-sa-token --from-literal=token=$(openssl rand -base64 32) -n demo
 
 kubectl patch serviceaccount demo-sa -p '{"secrets": [{"name": "demo-sa-token"}]}' -n demo
+-----------
+sample dummy kubeconfig-demo:
 
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority: /etc/kubernetes/pki/ca.crt  # Example file path
+    # certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCg==  # Example base64-encoded CA data
+    server: https://192.168.99.100:6443  # Example API server URL
+  name: my-cluster
+contexts:
+- context:
+    cluster: my-cluster
+    namespace: demo
+    user: demo-sa
+  name: demo
+current-context: demo
+users:
+- name: demo-sa
+  user:
+    token: eyJhbGciOiJSUzI1NiIsImtpZCI6Ijc1Y2Y5YjY3Z...  # Example token
+--------------------
